@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: bakery-cost-calculator
+    name: bakery
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
