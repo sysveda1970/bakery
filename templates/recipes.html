@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}レシピ一覧 - パン屋原価計算{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>レシピ一覧</h1>
+    <a href="{{ url_for('new_recipe') }}" class="btn btn-primary">新規レシピ作成</a>
+</div>
+
+{% if recipe_data %}
+<div class="row">
+    {% for data in recipe_data %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ data.recipe.product_name }}</h5>
+                <hr>
+                <p class="mb-2"><strong>販売価格:</strong> {{ data.recipe.selling_price|currency }}</p>
+                <p class="mb-2"><strong>製造個数:</strong> {{ data.recipe.production_quantity }}個</p>
+                <p class="mb-2"><strong>材料費合計:</strong> {{ data.material_cost|currency }}</p>
+                <p class="mb-2"><strong>1個あたり原価:</strong> {{ data.cost_per_item|currency }}</p>
+                <p class="mb-2">
+                    <strong>原価率:</strong>
+                    <span class="badge {% if data.cost_rate > 50 %}bg-danger{% elif data.cost_rate > 35 %}bg-warning{% else %}bg-success{% endif %}">
+                        {{ data.cost_rate|percentage }}
+                    </span>
+                </p>
+                <p class="mb-2"><strong>利益:</strong> {{ data.profit|currency }}</p>
+                <p class="mb-2"><strong>利益率:</strong> {{ data.profit_rate|percentage }}</p>
+
+                <hr>
+                <h6>使用材料:</h6>
+                <ul class="small">
+                    {% for ri in data.recipe.recipe_ingredients %}
+                    <li>{{ ri.ingredient.name }}: {{ ri.quantity }}{{ ri.ingredient.unit }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('edit_recipe', recipe_id=data.recipe.id) }}" class="btn btn-sm btn-outline-primary">編集</a>
+                    <a href="{{ url_for('recipe_label', recipe_id=data.recipe.id) }}" class="btn btn-sm btn-outline-info">ラベル</a>
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteRecipeModal{{ data.recipe.id }}">削除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div class="modal fade" id="deleteRecipeModal{{ data.recipe.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('delete_recipe', recipe_id=data.recipe.id) }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">削除確認</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>レシピ「{{ data.recipe.product_name }}」を削除しますか?</p>
+                        <p class="text-danger">この操作は取り消せません。</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                        <button type="submit" class="btn btn-danger">削除</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <p class="mb-0">まだレシピが登録されていません。</p>
+    <a href="{{ url_for('new_recipe') }}" class="alert-link">新規レシピを作成</a>
+</div>
+{% endif %}
+{% endblock %}

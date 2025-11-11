@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}ダッシュボード - パン屋原価計算{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">ダッシュボード</h1>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">登録レシピ数</h5>
+                <p class="card-text display-4">{{ total_recipes }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">登録材料数</h5>
+                <p class="card-text display-4">{{ ingredients_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">平均原価率</h5>
+                <p class="card-text display-4">{{ avg_cost_rate|percentage }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">クイックアクション</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('new_recipe') }}" class="btn btn-primary">新規レシピ登録</a>
+                    <a href="{{ url_for('ingredients') }}" class="btn btn-success">材料マスタ管理</a>
+                    <a href="{{ url_for('recipes') }}" class="btn btn-info">レシピ一覧</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">店舗情報</h5>
+                <p><strong>店舗名:</strong> {{ user.store_name }}</p>
+                <p><strong>ユーザーID:</strong> {{ user.username }}</p>
+                <p><strong>登録日:</strong> {{ user.created_at.strftime('%Y年%m月%d日') }}</p>
+                <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">店舗設定</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

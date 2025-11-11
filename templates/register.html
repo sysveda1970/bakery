@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}新規登録 - パン屋原価計算{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">新規登録</h2>
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="store_name" class="form-label">店舗名</label>
+                        <input type="text" class="form-control" id="store_name" name="store_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">ユーザーID</label>
+                        <input type="text" class="form-control" id="username" name="username" required minlength="3">
+                        <div class="form-text">3文字以上で入力してください</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">パスワード</label>
+                        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                        <div class="form-text">6文字以上で入力してください</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirm" class="form-label">パスワード(確認)</label>
+                        <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">登録</button>
+                </form>
+                <hr>
+                <p class="text-center mb-0">
+                    <a href="{{ url_for('login') }}">ログインはこちら</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}ラベル作成 - パン屋原価計算{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-4">商品ラベル作成</h1>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ recipe.product_name }}</h5>
+                <hr>
+
+                <h6>プレビュー</h6>
+                <div class="label-preview border p-3 bg-light">
+                    <div class="label-content">
+                        <h4 class="mb-2">{{ recipe.product_name }}</h4>
+                        <p class="mb-2"><strong>【原材料】</strong></p>
+                        <p class="small mb-2">
+                            {% for ri in recipe.recipe_ingredients %}
+                                {{ ri.ingredient.name }}{% if not loop.last %}、{% endif %}
+                            {% endfor %}
+                        </p>
+                        <p class="mb-1" id="preview-price"><strong>¥{{ recipe.selling_price|int }}</strong></p>
+                        <p class="small mb-0" id="preview-date">製造日: {{ now.strftime('%Y年%m月%d日') }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6>ラベル設定</h6>
+                <form id="label-form">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="include_price" checked>
+                        <label class="form-check-label" for="include_price">
+                            販売価格を表示
+                        </label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="include_date" checked>
+                        <label class="form-check-label" for="include_date">
+                            製造日を表示
+                        </label>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('recipes') }}" class="btn btn-secondary">戻る</a>
+                    <a href="#" id="download-pdf" class="btn btn-primary">PDFをダウンロード</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">ラベル情報</h5>
+                <ul class="small">
+                    <li>ラベルサイズ: 60mm × 40mm</li>
+                    <li>A4用紙に印刷可能</li>
+                    <li>原材料は配合順に表示されます</li>
+                </ul>
+                <hr>
+                <h6 class="small">使い方:</h6>
+                <ol class="small mb-0">
+                    <li>表示項目を選択</li>
+                    <li>PDFをダウンロード</li>
+                    <li>印刷してご使用ください</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const includePriceCheckbox = document.getElementById('include_price');
+    const includeDateCheckbox = document.getElementById('include_date');
+    const previewPrice = document.getElementById('preview-price');
+    const previewDate = document.getElementById('preview-date');
+    const downloadLink = document.getElementById('download-pdf');
+
+    // プレビューの更新
+    function updatePreview() {
+        previewPrice.style.display = includePriceCheckbox.checked ? 'block' : 'none';
+        previewDate.style.display = includeDateCheckbox.checked ? 'block' : 'none';
+    }
+
+    // ダウンロードリンクの更新
+    function updateDownloadLink() {
+        const includePrice = includePriceCheckbox.checked;
+        const includeDate = includeDateCheckbox.checked;
+        const url = '{{ url_for("download_label_pdf", recipe_id=recipe.id) }}' +
+                    '?include_price=' + includePrice +
+                    '&include_date=' + includeDate;
+        downloadLink.href = url;
+    }
+
+    includePriceCheckbox.addEventListener('change', function() {
+        updatePreview();
+        updateDownloadLink();
+    });
+
+    includeDateCheckbox.addEventListener('change', function() {
+        updatePreview();
+        updateDownloadLink();
+    });
+
+    // 初期化
+    updatePreview();
+    updateDownloadLink();
+});
+</script>
+{% endblock %}

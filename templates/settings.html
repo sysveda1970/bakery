@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}店舗設定 - パン屋原価計算{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">店舗設定</h1>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">固定費設定</h5>
+                <p class="text-muted">固定費(家賃、光熱費等)を原価に含めることができます。</p>
+
+                <form method="POST" action="{{ url_for('settings') }}">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="fixed_cost_enabled"
+                               name="fixed_cost_enabled" {% if store_setting.fixed_cost_enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="fixed_cost_enabled">
+                            固定費を原価計算に含める
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="monthly_fixed_cost" class="form-label">月額固定費(円)</label>
+                        <input type="number" class="form-control" id="monthly_fixed_cost"
+                               name="monthly_fixed_cost" step="0.01"
+                               value="{{ store_setting.monthly_fixed_cost }}">
+                        <div class="form-text">家賃、光熱費、人件費など月々にかかる固定費の合計</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="monthly_production" class="form-label">月間生産個数</label>
+                        <input type="number" class="form-control" id="monthly_production"
+                               name="monthly_production"
+                               value="{{ store_setting.monthly_production }}">
+                        <div class="form-text">1ヶ月あたりの全商品の生産個数の合計</div>
+                    </div>
+
+                    {% if store_setting.fixed_cost_enabled and store_setting.monthly_production > 0 %}
+                    <div class="alert alert-info">
+                        <strong>商品1個あたりの固定費配賦額:</strong>
+                        {{ store_setting.get_fixed_cost_per_item()|currency }}
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary">設定を保存</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">店舗情報</h5>
+                <table class="table">
+                    <tr>
+                        <th>店舗名</th>
+                        <td>{{ user.store_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>ユーザーID</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>登録日</th>
+                        <td>{{ user.created_at.strftime('%Y年%m月%d日') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">固定費について</h5>
+                <p class="small">固定費を原価に含めることで、より正確な利益計算ができます。</p>
+                <h6 class="small">計算方法:</h6>
+                <p class="small mb-0">
+                    商品1個あたりの固定費配賦額 = 月額固定費 ÷ 月間生産個数
+                </p>
+                <hr>
+                <h6 class="small">例:</h6>
+                <ul class="small mb-0">
+                    <li>月額固定費: 300,000円</li>
+                    <li>月間生産個数: 3,000個</li>
+                    <li>配賦額: 100円/個</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

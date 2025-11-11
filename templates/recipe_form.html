@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{% if recipe %}レシピ編集{% else %}レシピ新規作成{% endif %} - パン屋原価計算{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <h1 class="mb-4">{% if recipe %}レシピ編集{% else %}レシピ新規作成{% endif %}</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{% if recipe %}{{ url_for('update_recipe', recipe_id=recipe.id) }}{% else %}{{ url_for('add_recipe') }}{% endif %}">
+                    <h5 class="mb-3">基本情報</h5>
+
+                    <div class="mb-3">
+                        <label for="product_name" class="form-label">商品名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="product_name" name="product_name"
+                               value="{% if recipe %}{{ recipe.product_name }}{% endif %}" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="selling_price" class="form-label">販売価格(円) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="selling_price" name="selling_price"
+                                   step="0.01" value="{% if recipe %}{{ recipe.selling_price }}{% endif %}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="production_quantity" class="form-label">製造個数 <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="production_quantity" name="production_quantity"
+                                   value="{% if recipe %}{{ recipe.production_quantity }}{% else %}1{% endif %}" required>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h5 class="mb-3">使用材料</h5>
+
+                    <div id="ingredients-container">
+                        {% if recipe %}
+                            {% for ri in recipe.recipe_ingredients %}
+                            <div class="ingredient-row mb-3">
+                                <div class="row align-items-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label">材料</label>
+                                        <select class="form-select" name="ingredient_id[]" required>
+                                            <option value="">選択してください</option>
+                                            {% for ingredient in ingredients_list %}
+                                            <option value="{{ ingredient.id }}"
+                                                    {% if ingredient.id == ri.ingredient_id %}selected{% endif %}>
+                                                {{ ingredient.name }} ({{ ingredient.unit_price|currency }}/{{ ingredient.unit }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">使用量</label>
+                                        <input type="number" class="form-control" name="quantity[]"
+                                               step="0.01" value="{{ ri.quantity }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger w-100 remove-ingredient">削除</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="ingredient-row mb-3">
+                                <div class="row align-items-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label">材料</label>
+                                        <select class="form-select" name="ingredient_id[]" required>
+                                            <option value="">選択してください</option>
+                                            {% for ingredient in ingredients_list %}
+                                            <option value="{{ ingredient.id }}">
+                                                {{ ingredient.name }} ({{ ingredient.unit_price|currency }}/{{ ingredient.unit }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">使用量</label>
+                                        <input type="number" class="form-control" name="quantity[]"
+                                               step="0.01" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger w-100 remove-ingredient">削除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mb-3" id="add-ingredient">
+                        + 材料を追加
+                    </button>
+
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('recipes') }}" class="btn btn-secondary">キャンセル</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if recipe %}更新{% else %}作成{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 材料行のテンプレート(非表示) -->
+<template id="ingredient-row-template">
+    <div class="ingredient-row mb-3">
+        <div class="row align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">材料</label>
+                <select class="form-select" name="ingredient_id[]" required>
+                    <option value="">選択してください</option>
+                    {% for ingredient in ingredients_list %}
+                    <option value="{{ ingredient.id }}">
+                        {{ ingredient.name }} ({{ ingredient.unit_price|currency }}/{{ ingredient.unit }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">使用量</label>
+                <input type="number" class="form-control" name="quantity[]" step="0.01" required>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger w-100 remove-ingredient">削除</button>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('ingredients-container');
+    const addButton = document.getElementById('add-ingredient');
+    const template = document.getElementById('ingredient-row-template');
+
+    // 材料追加
+    addButton.addEventListener('click', function() {
+        const newRow = template.content.cloneNode(true);
+        container.appendChild(newRow);
+    });
+
+    // 材料削除(イベントデリゲーション)
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-ingredient')) {
+            const rows = container.querySelectorAll('.ingredient-row');
+            if (rows.length > 1) {
+                e.target.closest('.ingredient-row').remove();
+            } else {
+                alert('最低1つの材料が必要です');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
